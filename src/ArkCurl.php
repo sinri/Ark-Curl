@@ -175,6 +175,11 @@ class ArkCurl
             ["URL" => $this->url, "HEADER" => $this->headerList, "BODY" => $this->postData]
         );
 
+        // @since 1.1 For HEAD, the default is no body, you can override in option list
+        if ($this->method === 'HEAD') {
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+        }
+
         // inject options
         if (!empty($this->optionList)) {
             foreach ($this->optionList as $option => $value) {
