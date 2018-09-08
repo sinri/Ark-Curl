@@ -21,10 +21,16 @@ class ArkCurl
     protected $cookieList;
     protected $logger;
     protected $optionList;
+    protected $responseMeta;
+    protected $responseHeaders;
+    private $needParseHeader;
 
     public function __construct()
     {
         $this->logger = ArkLogger::makeSilentLogger();
+        $this->needParseHeader = false;
+        $this->responseMeta = null;
+        $this->responseHeaders = null;
         $this->resetParameters();
     }
 
@@ -37,6 +43,33 @@ class ArkCurl
         $this->headerList = [];
         $this->cookieList = [];
         $this->optionList = [];
+    }
+
+    /**
+     * @since 1.2 For HEAD, add HEADER fetch
+     * @return mixed
+     */
+    public function getResponseHeaders()
+    {
+        return $this->responseHeaders;
+    }
+
+    /**
+     * @since 1.2 For HEAD, add HEADER fetch
+     * @return array
+     */
+    public function getResponseMeta()
+    {
+        return $this->responseMeta;
+    }
+
+    /**
+     * @since 1.2 For HEAD, add HEADER fetch
+     * @return int
+     */
+    public function getResponseCode()
+    {
+        return $this->responseMeta['http_code'];
     }
 
     /**
@@ -131,6 +164,10 @@ class ArkCurl
      */
     public function execute($takePostDataAsJson = false)
     {
+        $this->needParseHeader = false;
+        $this->responseMeta = null;
+        $this->responseHeaders = null;
+
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -178,16 +215,35 @@ class ArkCurl
         // @since 1.1 For HEAD, the default is no body, you can override in option list
         if ($this->method === 'HEAD') {
             curl_setopt($ch, CURLOPT_NOBODY, true);
+            // @since 1.2 For HEAD, add HEADER fetch
+            curl_setopt($ch, CURLOPT_HEADER, true);
+            $this->needParseHeader = true;
         }
 
         // inject options
         if (!empty($this->optionList)) {
             foreach ($this->optionList as $option => $value) {
                 curl_setopt($ch, $option, $value);
+                // @since 1.2 For HEAD, add HEADER fetch
+                if ($option === CURLOPT_HEADER && $value === true) {
+                    $this->needParseHeader = true;
+                }
             }
         }
 
         $response = curl_exec($ch);
+
+        // @since 1.2 For HEAD, add HEADER fetch
+        $this->responseMeta = curl_getinfo($ch);
+        if ($this->needParseHeader) {
+            $lines = preg_split("/[\r\n]+/", $response);
+            $this->responseHeaders = [];
+            foreach ($lines as $line) {
+                if (preg_match('/([^:]+): (.*)$/', $line, $matches)) {
+                    $this->responseHeaders[$matches[1]] = $matches[2];
+                }
+            }
+        }
 
         $this->logger->info("CURL-{$this->method}-Response", [$response]);
 
