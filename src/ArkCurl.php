@@ -83,10 +83,12 @@ class ArkCurl
     /**
      * @param int $option definition of CURL OPTION cluster
      * @param mixed $value
+     * @return ArkCurl @since 1.3 this method could be chained
      */
     public function setCURLOption($option, $value)
     {
         $this->optionList[$option] = $value;
+        return $this;
     }
 
     /**
