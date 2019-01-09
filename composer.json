@@ -13,7 +13,7 @@
   "require": {
     "ext-json": "*",
     "ext-curl": "*",
-    "sinri/ark-core": "~1.0"
+    "sinri/ark-core": "~2.0"
   },
   "repositories": {
     "packagist": {

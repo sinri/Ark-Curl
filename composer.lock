@@ -4,20 +4,20 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "18125fb5a2fb12aea06c4c4b23cc65e5",
+  "content-hash": "645bd3af10b3becda1cadd9ad3e39d18",
   "packages": [
     {
       "name": "psr/log",
-      "version": "1.0.2",
+      "version": "1.1.0",
       "source": {
         "type": "git",
         "url": "https://github.com/php-fig/log.git",
-        "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d"
+        "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd"
       },
       "dist": {
         "type": "zip",
-        "url": "https://api.github.com/repos/php-fig/log/zipball/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
-        "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+        "url": "https://api.github.com/repos/php-fig/log/zipball/6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
+        "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
         "shasum": "",
         "mirrors": [
           {
@@ -57,20 +57,20 @@
         "psr",
         "psr-3"
       ],
-      "time": "2016-10-10T12:19:37+00:00"
+      "time": "2018-11-20T15:27:04+00:00"
     },
     {
       "name": "sinri/ark-core",
-      "version": "1.0",
+      "version": "2.0",
       "source": {
         "type": "git",
         "url": "https://github.com/sinri/Ark-Core.git",
-        "reference": "a268a80d97a7a51aedef8c4756f5e34ac582e467"
+        "reference": "5c0eae9cfb2da4eefc06e92e9667f0d31c380c5c"
       },
       "dist": {
         "type": "zip",
-        "url": "https://api.github.com/repos/sinri/Ark-Core/zipball/a268a80d97a7a51aedef8c4756f5e34ac582e467",
-        "reference": "a268a80d97a7a51aedef8c4756f5e34ac582e467",
+        "url": "https://api.github.com/repos/sinri/Ark-Core/zipball/5c0eae9cfb2da4eefc06e92e9667f0d31c380c5c",
+        "reference": "5c0eae9cfb2da4eefc06e92e9667f0d31c380c5c",
         "shasum": "",
         "mirrors": [
           {
@@ -80,6 +80,7 @@
         ]
       },
       "require": {
+        "ext-json": "*",
         "psr/log": "~1.0"
       },
       "type": "library",
@@ -99,7 +100,7 @@
         }
       ],
       "description": "The core components of Ark 2",
-      "time": "2018-09-06T16:24:16+00:00"
+      "time": "2019-01-08T16:30:30+00:00"
     }
   ],
   "packages-dev": [],
