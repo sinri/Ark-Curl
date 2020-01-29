@@ -25,9 +25,14 @@ class ArkCurl
     protected $responseHeaders;
     private $needParseHeader;
 
-    public function __construct()
+    /**
+     * ArkCurl constructor.
+     * @param null|ArkLogger $logger @since 2.0.2
+     */
+    public function __construct($logger = null)
     {
-        $this->logger = ArkLogger::makeSilentLogger();
+        if ($logger === null) $logger = ArkLogger::makeSilentLogger();
+        $this->logger = $logger;
         $this->needParseHeader = false;
         $this->responseMeta = null;
         $this->responseHeaders = null;
@@ -74,10 +79,12 @@ class ArkCurl
 
     /**
      * @param ArkLogger $logger
+     * @return ArkCurl @since 2.0.2
      */
     public function setLogger(ArkLogger $logger)
     {
         $this->logger = $logger;
+        return $this;
     }
 
     /**
