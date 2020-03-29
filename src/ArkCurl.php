@@ -23,6 +23,8 @@ class ArkCurl
     protected $optionList;
     protected $responseMeta;
     protected $responseHeaders;
+    protected $errorNo;
+    protected $errorMessage;
     private $needParseHeader;
 
     /**
@@ -51,8 +53,26 @@ class ArkCurl
     }
 
     /**
-     * @since 1.2 For HEAD, add HEADER fetch
+     * @return int
+     * @since 2.0.3
+     */
+    public function getErrorNo()
+    {
+        return $this->errorNo;
+    }
+
+    /**
+     * @return string
+     * @since 2.0.3
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
+    }
+
+    /**
      * @return mixed
+     * @since 1.2 For HEAD, add HEADER fetch
      */
     public function getResponseHeaders()
     {
@@ -173,6 +193,9 @@ class ArkCurl
      */
     public function execute($takePostDataAsJson = false)
     {
+        $this->errorNo = 0;
+        $this->errorMessage = '';
+
         $this->needParseHeader = false;
         $this->responseMeta = null;
         $this->responseHeaders = null;
@@ -255,6 +278,9 @@ class ArkCurl
         }
 
         $this->logger->info("CURL-{$this->method}-Response", [$response]);
+
+        $this->errorNo = curl_errno($ch);
+        $this->errorMessage = curl_error($ch);
 
         curl_close($ch);
 
