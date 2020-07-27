@@ -13,17 +13,26 @@
   "require": {
     "ext-json": "*",
     "ext-curl": "*",
-    "sinri/ark-core": "^2.2"
+    "sinri/ark-core": "^2.7",
+    "psr/http-client": "^1.0"
+  },
+  "suggest": {
+    "guzzlehttp/psr7": "^1.6"
   },
   "repositories": {
     "packagist": {
       "type": "composer",
-      "url": "https://packagist.laravel-china.org"
+      "url": "https://mirrors.aliyun.com/composer/"
     }
   },
   "autoload": {
     "psr-4": {
       "sinri\\ark\\io\\curl\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "sinri\\ark\\io\\curl\\test\\": "test/"
     }
   }
 }
