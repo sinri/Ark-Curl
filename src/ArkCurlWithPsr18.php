@@ -10,7 +10,12 @@ use Psr\Http\Message\ResponseInterface;
 use sinri\ark\core\ArkLogger;
 use function GuzzleHttp\Psr7\parse_response;
 
-class ArkCurlWithPsr18 implements ClientInterface
+/**
+ * Class ArkCurlWithPsr18
+ * @package sinri\ark\io\curl
+ * @since 2.1
+ */
+abstract class ArkCurlWithPsr18 implements ClientInterface
 {
     protected $logger;
 
@@ -19,6 +24,15 @@ class ArkCurlWithPsr18 implements ClientInterface
         $this->logger = $logger;
     }
 
+    /**
+     * Sends a PSR-7 request and returns a PSR-7 response.
+     *
+     * @param RequestInterface $request
+     *
+     * @return ResponseInterface
+     *
+     * @throws ArkCurlClientException If an error happens while processing the request.
+     */
     public function sendRequest(RequestInterface $request): ResponseInterface
     {
         $curl = (new ArkCurl($this->logger))
@@ -37,6 +51,16 @@ class ArkCurlWithPsr18 implements ClientInterface
         $contentType = $request->getHeaderLine('content-type');
         $result = $curl->execute((stripos($contentType, 'application/json') === 0));
 
-        return parse_response($result);
+        if ($result === false) {
+            throw new ArkCurlClientException($curl->getErrorMessage(), $curl->getErrorNo());
+        }
+
+        return $this->parseTextToResponse($result);
     }
+
+    /**
+     * @param string $text
+     * @return ResponseInterface
+     */
+    abstract public function parseTextToResponse($text): ResponseInterface;
 }

@@ -26,6 +26,7 @@ class ArkCurl
     protected $errorNo;
     protected $errorMessage;
     private $needParseHeader;
+    private $takePostDataAsJson = false;
 
     /**
      * ArkCurl constructor.
@@ -166,14 +167,29 @@ class ArkCurl
     }
 
     /**
-     * @param $headerName
-     * @param $headerValue
+     * @param string $headerName
+     * @param string $headerValue
      * @return $this
      */
     public function setHeader($headerName, $headerValue)
     {
         $this->headerList[$headerName] = $headerValue;
+        if (strtolower($headerName) === 'content-type') {
+            if (stripos($headerValue, 'application/json') === 0) {
+                $this->takePostDataAsJson = true;
+            }
+        }
         return $this;
+    }
+
+    /**
+     * A syntax sugar FOR json application
+     * @return $this
+     * @since 2.1
+     */
+    public function setContentTypeAsJsonInHeader()
+    {
+        return $this->setHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -188,10 +204,10 @@ class ArkCurl
     }
 
     /**
-     * @param bool $takePostDataAsJson
+     * @param bool $setContentTypeAsJson It is not recommended to use this parameter, use `setContentTypeAsJsonInHeader`.
      * @return string|bool
      */
-    public function execute($takePostDataAsJson = false)
+    public function execute($setContentTypeAsJson = false)
     {
         $this->errorNo = 0;
         $this->errorMessage = '';
@@ -208,8 +224,10 @@ class ArkCurl
         if ($use_body) {
             curl_setopt($ch, CURLOPT_POST, 1);
 
-            if ($takePostDataAsJson) {
-                $this->headerList['Content-Type'] = 'application/json';
+            if ($setContentTypeAsJson) {
+                $this->setContentTypeAsJsonInHeader();
+            }
+            if ($this->takePostDataAsJson) {
                 $this->postData = json_encode($this->postData);
             } else {
                 // if postData is raw string, leave it simply original
@@ -245,11 +263,10 @@ class ArkCurl
         );
 
         // @since 1.1 For HEAD, the default is no body, you can override in option list
+        // @since 2.1 refine processing
         if ($this->method === 'HEAD') {
-            curl_setopt($ch, CURLOPT_NOBODY, true);
-            // @since 1.2 For HEAD, add HEADER fetch
-            curl_setopt($ch, CURLOPT_HEADER, true);
-            $this->needParseHeader = true;
+            $this->setCURLOption(CURLOPT_HEADER, true)
+                ->setCURLOption(CURLOPT_NOBODY, true);
         }
 
         // inject options
