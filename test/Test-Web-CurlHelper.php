@@ -6,13 +6,14 @@
  * Time: 22:50
  */
 
+use sinri\ark\core\ArkLogger;
 use sinri\ark\io\curl\ArkCurl;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 //require_once __DIR__ . '/../autoload.php';
 
 $x = new ArkCurl();
-$logger = new \sinri\ark\core\ArkLogger(__DIR__ . '/log', 'curl');
+$logger = new ArkLogger(__DIR__ . '/log', 'curl');
 $x->setLogger($logger);
 $response = $x->prepareToRequestURL("GET", "https://sinri.cc")
     ->execute();

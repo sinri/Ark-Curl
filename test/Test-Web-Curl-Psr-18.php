@@ -1,9 +1,14 @@
 <?php
+
+use GuzzleHttp\Psr7\ServerRequest;
+use sinri\ark\core\ArkLogger;
+use sinri\ark\io\curl\test\implement\GuzzleCurl;
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$psr18 = (new \sinri\ark\io\curl\test\implement\GuzzleCurl(new \sinri\ark\core\ArkLogger()));
+$psr18 = (new GuzzleCurl(new ArkLogger()));
 
-$request = new \GuzzleHttp\Psr7\ServerRequest(
+$request = new ServerRequest(
     'GET',
     'https://www.leqee.com0'
 );

@@ -4,6 +4,7 @@
 namespace sinri\ark\io\curl;
 
 
+use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**
@@ -11,7 +12,7 @@ use Psr\Http\Client\ClientExceptionInterface;
  * @package sinri\ark\io\curl
  * @since 2.1
  */
-class ArkCurlClientException extends \Exception implements ClientExceptionInterface
+class ArkCurlClientException extends Exception implements ClientExceptionInterface
 {
 
 }
