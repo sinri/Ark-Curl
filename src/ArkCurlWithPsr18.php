@@ -8,7 +8,6 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use sinri\ark\core\ArkLogger;
-use function GuzzleHttp\Psr7\parse_response;
 
 /**
  * Class ArkCurlWithPsr18

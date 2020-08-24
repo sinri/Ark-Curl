@@ -294,7 +294,14 @@ class ArkCurl
             }
         }
 
-        $this->logger->info("CURL-{$this->method}-Response", [$response]);
+        if($response===false){
+            $this->logger->warning("CURL-{$this->method}-Response", ['response'=>$response]);
+        }
+        elseif($response===true){
+            $this->logger->info("CURL-{$this->method}-Response", ['response'=>$response]);
+        }else{
+            $this->logger->info("CURL-{$this->method}-Response as following: ".PHP_EOL.$response);
+        }
 
         $this->errorNo = curl_errno($ch);
         $this->errorMessage = curl_error($ch);
