@@ -193,6 +193,22 @@ class ArkCurl
     }
 
     /**
+     * @return $this
+     * @since 2.1.2
+     *
+     * @see https://www.php.net/manual/zh/function.curl-setopt.php#:~:text=Daemon%E5%A5%97%E6%8E%A5%E5%AD%97%E3%80%82-,CURLOPT_ENCODING,-HTTP%E8%AF%B7%E6%B1%82%E5%A4%B4
+     * About CURLOPT_ENCODING:
+     *  Set the value of HTTP Header `Accept-Encoding`, let the response be uncompressed.
+     *  Supported value: "identity", "deflate", "gzip".
+     *  If "", send all supported.
+     *  Added since cURL 7.10.
+     */
+    public function setAcceptEncoding(string $value = '')
+    {
+        return $this->setCURLOption(CURLOPT_ENCODING, $value);
+    }
+
+    /**
      * @param $cookieName
      * @param $cookieValue
      * @return $this
@@ -271,6 +287,10 @@ class ArkCurl
 
         // inject options
         if (!empty($this->optionList)) {
+
+            // since 2.1.2, default add support for accept encoding all, but
+            $this->setAcceptEncoding();
+
             foreach ($this->optionList as $option => $value) {
                 curl_setopt($ch, $option, $value);
                 // @since 1.2 For HEAD, add HEADER fetch

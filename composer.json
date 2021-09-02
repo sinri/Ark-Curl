@@ -13,8 +13,8 @@
   "require": {
     "ext-json": "*",
     "ext-curl": "*",
-    "sinri/ark-core": "^2.7",
-    "psr/http-client": "^1.0"
+    "sinri/ark-core": "~2.7",
+    "psr/http-client": "~1.0"
   },
   "suggest": {
     "guzzlehttp/psr7": "^1.6"
