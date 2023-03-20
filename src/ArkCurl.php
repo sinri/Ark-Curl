@@ -299,48 +299,43 @@ class ArkCurl
         return $this;
     }
 
-    /**
-     * @param $ch
-     * @param $response
-     * @return void
-     */
-    public function executeFinish()
+    protected function call()
     {
         $response = curl_exec($this->curlInstance);
 
-        $this->forMultiExecuteFinish($this->curlInstance, $response);
+        $this->forMultiExecuteFinish($this, $this->curlInstance, $response);
 
         curl_close($this->curlInstance);
 
         return $response;
     }
 
-    public function forMultiExecuteFinish($curl, $response)
+    public static function forMultiExecuteFinish($arkCurl, $curl, $response)
     {
         // @since 1.2 For HEAD, add HEADER fetch
-        $this->responseMeta = curl_getinfo($curl);
-        if ($this->needParseHeader) {
+        $arkCurl->responseMeta = curl_getinfo($curl);
+        if ($arkCurl->needParseHeader) {
             $lines = preg_split("/[\r\n]+/", $response);
-            $this->responseHeaders = [];
+            $arkCurl->responseHeaders = [];
             foreach ($lines as $line) {
                 if (preg_match('/([^:]+): (.*)$/', $line, $matches)) {
-                    $this->responseHeaders[$matches[1]] = $matches[2];
+                    $arkCurl->responseHeaders[$matches[1]] = $matches[2];
                 }
             }
         }
 
         if ($response === false) {
-            $this->logger->warning("CURL-{$this->method}-Response", ['response' => $response]);
+            $arkCurl->logger->warning("CURL-{$arkCurl->method}-Response", ['response' => $response]);
         } elseif ($response === true) {
-            $this->logger->info("CURL-{$this->method}-Response", ['response' => $response]);
+            $arkCurl->logger->info("CURL-{$arkCurl->method}-Response", ['response' => $response]);
         } else {
-            $this->logger->info("CURL-{$this->method}-Response as following: " . PHP_EOL . $response);
+            $arkCurl->logger->info("CURL-{$arkCurl->method}-Response as following: " . PHP_EOL . $response);
         }
 
-        $this->errorNo = curl_errno($this->curlInstance);
-        $this->errorMessage = curl_error($this->curlInstance);
+        $arkCurl->errorNo = curl_errno($arkCurl->curlInstance);
+        $arkCurl->errorMessage = curl_error($arkCurl->curlInstance);
 
-        $this->resetParameters();
+        $arkCurl->resetParameters();
     }
 
     /**
@@ -349,7 +344,7 @@ class ArkCurl
      */
     public function execute()
     {
-        return $this->configureCurlInstance()->executeFinish();
+        return $this->configureCurlInstance()->call();
     }
 
     /**

@@ -47,7 +47,7 @@ class ArkMultiCurl
 
     /**
      * @return array
-     * @since 2.1.3
+     * @since 2.2.0
      */
     public function execute(): array
     {
@@ -76,7 +76,7 @@ class ArkMultiCurl
         foreach ($curlList as $index => $curl) {
             $result = curl_multi_getcontent($curl);
             $arkCurl = $this->arkCurlList[$index];
-            $arkCurl->forMultiExecuteFinish($curl, $result);
+            $arkCurl->forMultiExecuteFinish($arkCurl, $curl, $result);
             $resultList[] = $result;
             curl_multi_remove_handle($mh, $curl);
         }
