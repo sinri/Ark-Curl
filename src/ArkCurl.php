@@ -81,8 +81,8 @@ class ArkCurl
     }
 
     /**
-     * @since 1.2 For HEAD, add HEADER fetch
      * @return array
+     * @since 1.2 For HEAD, add HEADER fetch
      */
     public function getResponseMeta()
     {
@@ -90,8 +90,8 @@ class ArkCurl
     }
 
     /**
-     * @since 1.2 For HEAD, add HEADER fetch
      * @return int
+     * @since 1.2 For HEAD, add HEADER fetch
      */
     public function getResponseCode()
     {
@@ -128,6 +128,7 @@ class ArkCurl
     {
         $this->method = $method;
         $this->url = $url;
+        $this->curlInstance = curl_init();
         return $this;
     }
 
@@ -193,6 +194,7 @@ class ArkCurl
     }
 
     /**
+     * @param string $value
      * @return $this
      * @since 2.1.2
      *
@@ -203,7 +205,7 @@ class ArkCurl
      *  If "", send all supported.
      *  Added since cURL 7.10.
      */
-    public function setAcceptEncoding(string $value = '')
+    public function setAcceptEncoding($value = '')
     {
         return $this->setCURLOption(CURLOPT_ENCODING, $value);
     }
@@ -220,10 +222,11 @@ class ArkCurl
     }
 
     /**
-     * @param $setContentTypeAsJson It is not recommended to use this parameter, use `setContentTypeAsJsonInHeader`.
-     * @return \CurlHandle|false|resource
+     * @var false|resource as of PHP 8, resource would be \CurlHandle
      */
-    public function getCurlHandle($setContentTypeAsJson = false)
+    private $curlInstance;
+
+    public function configureCurlInstance()
     {
         $this->errorNo = 0;
         $this->errorMessage = '';
@@ -232,17 +235,11 @@ class ArkCurl
         $this->responseMeta = null;
         $this->responseHeaders = null;
 
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
+        curl_setopt($this->curlInstance, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($this->curlInstance, CURLOPT_CUSTOMREQUEST, $this->method);
         $use_body = in_array($this->method, ["POST", "PUT"]);
         if ($use_body) {
-            curl_setopt($ch, CURLOPT_POST, 1);
-
-            if ($setContentTypeAsJson) {
-                $this->setContentTypeAsJsonInHeader();
-            }
+            curl_setopt($this->curlInstance, CURLOPT_POST, 1);
             if ($this->takePostDataAsJson) {
                 $this->postData = json_encode($this->postData);
             } else {
@@ -252,26 +249,26 @@ class ArkCurl
                 }
             }
 
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->postData);
+            curl_setopt($this->curlInstance, CURLOPT_POSTFIELDS, $this->postData);
         }
 
         $query_string = http_build_query($this->queryList);
         if (!empty($query_string)) {
             $this->url .= "?" . $query_string;
         }
-        curl_setopt($ch, CURLOPT_URL, $this->url);
+        curl_setopt($this->curlInstance, CURLOPT_URL, $this->url);
 
         if (!empty($this->headerList)) {
             $headers = [];
             foreach ($this->headerList as $key => $value) {
                 $headers[] = $key . ': ' . $value;
             }
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($this->curlInstance, CURLOPT_HTTPHEADER, $headers);
         }
         if (!empty($this->cookieList)) {
-            curl_setopt($ch, CURLOPT_COOKIE, implode(';', $this->cookieList));
+            curl_setopt($this->curlInstance, CURLOPT_COOKIE, implode(';', $this->cookieList));
         }
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($this->curlInstance, CURLOPT_SSL_VERIFYPEER, false);
 
         $this->logger->info(
             "CURL-{$this->method}-Request",
@@ -292,15 +289,14 @@ class ArkCurl
             $this->setAcceptEncoding();
 
             foreach ($this->optionList as $option => $value) {
-                curl_setopt($ch, $option, $value);
+                curl_setopt($this->curlInstance, $option, $value);
                 // @since 1.2 For HEAD, add HEADER fetch
                 if ($option === CURLOPT_HEADER && $value === true) {
                     $this->needParseHeader = true;
                 }
             }
         }
-
-        return $ch;
+        return $this;
     }
 
     /**
@@ -308,10 +304,21 @@ class ArkCurl
      * @param $response
      * @return void
      */
-    public function executeFinish($ch, $response)
+    public function executeFinish()
+    {
+        $response = curl_exec($this->curlInstance);
+
+        $this->forMultiExecuteFinish($this->curlInstance, $response);
+
+        curl_close($this->curlInstance);
+
+        return $response;
+    }
+
+    public function forMultiExecuteFinish($curl, $response)
     {
         // @since 1.2 For HEAD, add HEADER fetch
-        $this->responseMeta = curl_getinfo($ch);
+        $this->responseMeta = curl_getinfo($curl);
         if ($this->needParseHeader) {
             $lines = preg_split("/[\r\n]+/", $response);
             $this->responseHeaders = [];
@@ -322,35 +329,34 @@ class ArkCurl
             }
         }
 
-        if($response===false){
-            $this->logger->warning("CURL-{$this->method}-Response", ['response'=>$response]);
-        }
-        elseif($response===true){
-            $this->logger->info("CURL-{$this->method}-Response", ['response'=>$response]);
-        }else{
-            $this->logger->info("CURL-{$this->method}-Response as following: ".PHP_EOL.$response);
+        if ($response === false) {
+            $this->logger->warning("CURL-{$this->method}-Response", ['response' => $response]);
+        } elseif ($response === true) {
+            $this->logger->info("CURL-{$this->method}-Response", ['response' => $response]);
+        } else {
+            $this->logger->info("CURL-{$this->method}-Response as following: " . PHP_EOL . $response);
         }
 
-        $this->errorNo = curl_errno($ch);
-        $this->errorMessage = curl_error($ch);
+        $this->errorNo = curl_errno($this->curlInstance);
+        $this->errorMessage = curl_error($this->curlInstance);
 
         $this->resetParameters();
     }
 
     /**
-     * @param bool $setContentTypeAsJson It is not recommended to use this parameter, use `setContentTypeAsJsonInHeader`.
      * @return string|bool
+     * @since changed in 2.2.0
      */
-    public function execute($setContentTypeAsJson = false)
+    public function execute()
     {
-        $ch = $this->getCurlHandle($setContentTypeAsJson);
+        return $this->configureCurlInstance()->executeFinish();
+    }
 
-        $response = curl_exec($ch);
-        
-        $this->executeFinish($ch, $response);
-
-        curl_close($ch);
-
-        return $response;
+    /**
+     * @return false|resource
+     */
+    public function getCurlInstance(): bool
+    {
+        return $this->curlInstance;
     }
 }

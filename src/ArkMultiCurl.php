@@ -11,10 +11,18 @@ namespace sinri\ark\io\curl;
 
 use sinri\ark\core\ArkLogger;
 
+/**
+ * @since 2.2.0
+ */
 class ArkMultiCurl
 {
-
+    /**
+     * @var ArkCurl[]
+     */
     protected $arkCurlList;
+    /**
+     * @var ArkLogger|null
+     */
     protected $logger;
 
     /**
@@ -47,7 +55,8 @@ class ArkMultiCurl
         $mh = curl_multi_init();
         $curlList = [];
         foreach ($this->arkCurlList as $arkCurl) {
-            $ch = $arkCurl->getCurlHandle();
+            $arkCurl->configureCurlInstance();
+            $ch = $arkCurl->getCurlInstance();
             curl_multi_add_handle($mh, $ch);
             $curlList[] = $ch;
         }
@@ -67,7 +76,7 @@ class ArkMultiCurl
         foreach ($curlList as $index => $curl) {
             $result = curl_multi_getcontent($curl);
             $arkCurl = $this->arkCurlList[$index];
-            $arkCurl->executeFinish($curl, $result);
+            $arkCurl->forMultiExecuteFinish($curl, $result);
             $resultList[] = $result;
             curl_multi_remove_handle($mh, $curl);
         }
