@@ -220,10 +220,10 @@ class ArkCurl
     }
 
     /**
-     * @param bool $setContentTypeAsJson It is not recommended to use this parameter, use `setContentTypeAsJsonInHeader`.
-     * @return string|bool
+     * @param $setContentTypeAsJson It is not recommended to use this parameter, use `setContentTypeAsJsonInHeader`.
+     * @return \CurlHandle|false|resource
      */
-    public function execute($setContentTypeAsJson = false)
+    public function getCurlHandle($setContentTypeAsJson = false)
     {
         $this->errorNo = 0;
         $this->errorMessage = '';
@@ -300,8 +300,16 @@ class ArkCurl
             }
         }
 
-        $response = curl_exec($ch);
+        return $ch;
+    }
 
+    /**
+     * @param $ch
+     * @param $response
+     * @return void
+     */
+    public function executeFinish($ch, $response)
+    {
         // @since 1.2 For HEAD, add HEADER fetch
         $this->responseMeta = curl_getinfo($ch);
         if ($this->needParseHeader) {
@@ -326,9 +334,22 @@ class ArkCurl
         $this->errorNo = curl_errno($ch);
         $this->errorMessage = curl_error($ch);
 
-        curl_close($ch);
-
         $this->resetParameters();
+    }
+
+    /**
+     * @param bool $setContentTypeAsJson It is not recommended to use this parameter, use `setContentTypeAsJsonInHeader`.
+     * @return string|bool
+     */
+    public function execute($setContentTypeAsJson = false)
+    {
+        $ch = $this->getCurlHandle($setContentTypeAsJson);
+
+        $response = curl_exec($ch);
+        
+        $this->executeFinish($ch, $response);
+
+        curl_close($ch);
 
         return $response;
     }
