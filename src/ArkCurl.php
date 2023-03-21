@@ -350,7 +350,7 @@ class ArkCurl
     /**
      * @return false|resource
      */
-    public function getCurlInstance(): bool
+    public function getCurlInstance()
     {
         return $this->curlInstance;
     }

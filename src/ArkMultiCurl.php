@@ -27,7 +27,7 @@ class ArkMultiCurl
 
     /**
      * ArkCurl constructor.
-     * @param ArkLogger|null $logger @since 2.1.3
+     * @param ArkLogger|null $logger @since 2.2.0
      */
     public function __construct(ArkLogger $logger = null)
     {
@@ -37,11 +37,22 @@ class ArkMultiCurl
 
     /**
      * @param ArkCurl $arkCurl
-     * @since 2.1.3
+     * @since 2.2.0
      */
     public function addCurl(ArkCurl $arkCurl)
     {
         $this->arkCurlList[] = $arkCurl;
+    }
+
+    /**
+     * @param ArkCurl[] $arkCurlList
+     * @since 2.2.0
+     */
+    public function addCurlList(array $arkCurlList)
+    {
+        foreach ($arkCurlList as $arkCurl) {
+            $this->addCurl($arkCurl);
+        }
     }
 
 
